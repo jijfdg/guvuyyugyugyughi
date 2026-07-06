@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Application</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0f0f0f;
+}
+
+.container{
+  display:flex;
+  min-height:100vh;
+}
+
+.left{
+  flex:1;
+  background:#fff;
+  padding:40px;
+}
+
+input, select{
+  width:100%;
+  padding:10px;
+  margin-top:5px;
+  border:1px solid #ddd;
+  border-radius:8px;
+}
+
+button{
+  width:100%;
+  padding:14px;
+  margin-top:20px;
+  background:black;
+  color:white;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+#loading{
+  display:none;
+  margin-top:15px;
+  color:#999;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <div class="left">
+
+    <h2>Application Form</h2>
+
+    <form id="applicationForm">
+
+      <input name="firstName" placeholder="First Name" required>
+      <input name="lastName" placeholder="Last Name" required>
+      <input name="email" placeholder="Email" required>
+
+      <select name="country">
+        <option>Ukraine</option>
+        <option>USA</option>
+        <option>Canada</option>
+        <option>UK</option>
+      </select>
+
+      <button type="submit" id="btn">Submit Application</button>
+
+      <div id="loading">Processing... 30 seconds</div>
+
+    </form>
+
+  </div>
+</div>
+
+<script>
+window.onload = function () {
+
+  const form = document.getElementById("applicationForm");
+  const loading = document.getElementById("loading");
+  const btn = document.getElementById("btn");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const data = Object.fromEntries(new FormData(form));
+
+    loading.style.display = "block";
+    btn.disabled = true;
+    btn.innerText = "Processing...";
+
+    // 30 sec loader
+    await new Promise(r => setTimeout(r, 30000));
+
+    await fetch("/.netlify/functions/sendToTelegram", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(data)
+    });
+
+    loading.innerText = "✔ Sent";
+
+    setTimeout(() => {
+      loading.style.display = "none";
+      btn.disabled = false;
+      btn.innerText = "Submit Application";
+      form.reset();
+    }, 2000);
+
+  });
+
+};
+</script>
+
+</body>
+</html>
